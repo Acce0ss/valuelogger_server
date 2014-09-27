@@ -1,0 +1,24 @@
+<?php
+
+//table names:
+$prefix			= "r_";
+$recipes		= $prefix . "recipes";
+$ingredients 		= $prefix . "ingre";
+$recipe_ingredients 	= $prefix . "re_ingre";
+$categories		= $prefix . "cat";
+$subcategories		= $prefix . "subcat";
+$category_subcategories		= $prefix . "cat_subcat";
+$recipe_categories	= $prefix . "recipe_cat";
+$users			= $prefix . "cooks";
+$units			= $prefix . "units";
+
+$host = "localhost";
+$dbname = "resepti_db";
+$user = "resepti";
+$pass = "itpeser";
+
+
+$db = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+?>

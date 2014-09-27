@@ -1,0 +1,245 @@
+<html>
+<head>
+</head>
+<body>
+<?php
+
+include('database_connection.php');
+
+try{
+
+$db->beginTransaction();
+
+$query = "DROP TABLE IF EXISTS $recipe_ingredients";
+
+$db->exec($query);
+
+echo "Poistettu vanhat reseptien ainekset!<br>";
+
+$query = "DROP TABLE IF EXISTS $units";
+
+$db->exec($query);
+
+echo "Poistettu vanhat yksiköt!<br>";
+
+$query = "DROP TABLE IF EXISTS $recipe_categories";
+
+$db->exec($query);
+
+echo "Poistettu vanhat reseptien kategoriat!<br>";
+
+$query = "DROP TABLE IF EXISTS $category_subcategories";
+
+$db->exec($query);
+
+echo "Poistettu vanhat kategorioiden alakategoriat!<br>";
+
+$query = "DROP TABLE IF EXISTS $subcategories";
+
+$db->exec($query);
+
+echo "Poistettu vanhat alakategoriat!<br>";
+
+$query = "DROP TABLE IF EXISTS $categories";
+
+$db->exec($query);
+
+echo "Poistettu vanhat kategoriat!<br>";
+
+$query = "DROP TABLE IF EXISTS $ingredients";
+
+$db->exec($query);
+
+echo "Poistettu vanhat aineet!<br>";
+
+$query = "DROP TABLE IF EXISTS $recipes";
+
+$db->exec($query);
+
+echo "Poistettu vanhat reseptit!<br>";
+
+$query = "DROP TABLE IF EXISTS $users";
+
+$db->exec($query);
+
+echo "Poistettu vanhat käyttäjät!<br>";
+
+$query=	" CREATE TABLE $users ( " .
+	" id INT NOT NULL AUTO_INCREMENT," .
+	" username VARCHAR(20) NOT NULL," .
+	" displayname VARCHAR(30) NOT NULL DEFAULT 'Procook'," .
+	" joined DATE NOT NULL," .
+	" active BOOL NOT NULL DEFAULT 1," .
+	" password VARCHAR(40) NOT NULL," .
+	" PRIMARY KEY(id)" .
+	" )";
+
+$db->exec($query);
+
+echo "Lisätty käyttäjät!<br>";
+
+$query=	" CREATE TABLE $ingredients ( " .
+	" id INT NOT NULL AUTO_INCREMENT," .
+	" name VARCHAR(30) NOT NULL," .
+	" description VARCHAR(1024) NOT NULL," .
+	" isSpice BOOL NOT NULL DEFAULT 0," .
+	" source VARCHAR(150) NOT NULL DEFAULT ''," .
+	" PRIMARY KEY(id)" .
+	" )";
+
+$db->exec($query);
+
+echo "Lisätty ainestaulu!<br>";
+
+$query=	" CREATE TABLE $units ( " .
+	" id INT NOT NULL AUTO_INCREMENT," .
+	" name VARCHAR(30) NOT NULL," .
+	" PRIMARY KEY(id)" .
+	" )";
+
+$db->exec($query);
+
+echo "Lisätty yksikkötaulu!<br>";
+
+$query=	" CREATE TABLE $categories ( " .
+	" id INT NOT NULL AUTO_INCREMENT," .
+	" name VARCHAR(30) NOT NULL," .
+	" PRIMARY KEY(id)" .
+	" )";
+
+$db->exec($query);
+
+echo "Lisätty kategoriataulu!<br>";
+
+$query=	" CREATE TABLE $subcategories ( " .
+	" id INT NOT NULL AUTO_INCREMENT," .
+	" name VARCHAR(30) NOT NULL," .
+	" PRIMARY KEY(id)" .
+	" )";
+
+$db->exec($query);
+
+echo "Lisätty alakategoriataulu!<br>";
+
+$query=	" CREATE TABLE $category_subcategories ( " .
+	" id INT NOT NULL AUTO_INCREMENT," .
+	" catId INT NOT NULL," .
+	" subId INT NOT NULL," .
+	" PRIMARY KEY(id)," .
+	" UNIQUE(catId, subId)," .
+	" FOREIGN KEY(catId) REFERENCES $categories(id) ON DELETE RESTRICT ON UPDATE CASCADE," .
+	" FOREIGN KEY(subId) REFERENCES $subcategories(id) ON DELETE RESTRICT ON UPDATE CASCADE" .
+	" )";
+
+$db->exec($query);
+
+echo "Lisätty kategorioiden alakategoriataulu!<br>";
+
+$query=	" CREATE TABLE $recipes ( " .
+	" id INT NOT NULL AUTO_INCREMENT," .
+	" name VARCHAR(30) NOT NULL," .
+	" recipe TEXT NOT NULL DEFAULT ''," .
+	" created DATE NOT NULL," .
+	" modified DATE NOT NULL," .
+	" creatorId INT NOT NULL," .
+	" source VARCHAR(150) NOT NULL DEFAULT ''," .
+	" story TEXT NOT NULL DEFAULT ''," .
+	" PRIMARY KEY(id)," .
+	" FOREIGN KEY(creatorId) REFERENCES $users(id) ON DELETE RESTRICT ON UPDATE CASCADE" .
+	" )";
+
+$db->exec($query);
+
+echo "Lisätty reseptitaulu!<br>";
+
+
+$query=	" CREATE TABLE $recipe_categories ( " .
+	" recipeId INT NOT NULL," .
+	" catId INT NOT NULL," .
+	" PRIMARY KEY(recipeId, catId)," .
+	" FOREIGN KEY(catId) REFERENCES $category_subcategories(id) ON DELETE RESTRICT ON UPDATE CASCADE," .
+	" FOREIGN KEY(recipeId) REFERENCES $recipes(id) ON DELETE RESTRICT ON UPDATE CASCADE" .
+	" )";
+
+$db->exec($query);
+
+echo "Lisätty reseptien kategoriataulu!<br>";
+
+$query=	" CREATE TABLE $recipe_ingredients ( " .
+	" recipeId INT NOT NULL," .
+	" ingredientId INT NOT NULL," .
+	" amount FLOAT NOT NULL DEFAULT 0," .
+	" unitId INT NOT NULL," .
+	" isExtra BOOL NOT NULL DEFAULT 0," .
+	" PRIMARY KEY(recipeId, ingredientId)," .
+	" FOREIGN KEY(unitId) REFERENCES $units(id) ON DELETE RESTRICT ON UPDATE CASCADE," .
+	" FOREIGN KEY(recipeId) REFERENCES $recipes(id) ON DELETE RESTRICT ON UPDATE CASCADE," .
+	" FOREIGN KEY(ingredientId) REFERENCES $ingredients(id) ON DELETE RESTRICT ON UPDATE CASCADE" .
+	" )";
+
+$db->exec($query);
+
+echo "Lisätty reseptien ainestaulu!<br>";
+
+
+
+
+$query=	"INSERT INTO $users(username, password, displayname, joined)  " .
+	"  values( 'sakke'," .
+	"      SHA('sakke')," .
+	"          'Sakari'," .
+	"          DATE(NOW()))";
+
+$db->exec($query);
+
+echo "Lisätty Sakari!<br>";
+
+$query=	"INSERT INTO $users(username, password, displayname, joined)  " .
+	"  values( 'sini'," .
+	"      SHA('sini')," .
+	"          'Sini'," .
+	"          DATE(NOW()))";
+
+$db->exec($query);
+
+echo "Lisätty Sini!<br>";
+
+$query=	"INSERT INTO $users(username, password, displayname, joined)  " .
+	"  values( 'asser'," .
+	"      SHA('a0210l88')," .
+	"          'Asser'," .
+	"          DATE(NOW()))";
+
+$db->exec($query);
+
+echo "Lisätty Asser!<br>";
+
+$query=	"INSERT INTO $categories(name)  " .
+	"  values( 'Yleiset')";
+
+$db->exec($query);
+
+$query=	"INSERT INTO $subcategories(name)  " .
+	"  values( 'Yleinen')";
+
+$db->exec($query);
+
+$query=	"INSERT INTO $category_subcategories(CatId,SubId)  " .
+	"  values( 1, 1)";
+
+$db->exec($query);
+
+$db->commit();
+
+}catch(PDOException $ex)
+{
+
+	$db->rollBack();
+	echo "Virhe, tietokantaa ei voitu alustaa!<br><br>";
+
+	echo $ex->getMessage();
+}
+
+?>
+</body>
+</html>
