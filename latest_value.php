@@ -4,7 +4,7 @@ require_once('messages.php');
 require_once('database/database_connection.php');
 require_once('helpers/authentication.php');
 
-function add_value($request)
+function get_latest_value($request)
 {
 
   if($request->isPost())
@@ -17,9 +17,7 @@ function add_value($request)
 
     check_fields($data, array(
       'user',
-      'password',
-      'value',
-      'serie_id'
+      'password'
     ));
 
     if(!verify_pw($data['user'], $data['password']))
@@ -33,49 +31,33 @@ function add_value($request)
 
       $db->beginTransaction();
 
-      $query = "SELECT user.id,user.authlevel,perm.authlevel " .
+      $query = "SELECT user.id AS user_id, meas.value AS value, meas.id AS measurement_id, meas.dataserie_id, serie.name, MAX(meas.timestamp) AS time" .
 	       " FROM $tables[user] AS user, ". 
-	       "      $tables[serie_permission] AS perm ".
+	       "      $tables[measurement] AS meas, ".
+	       "      $tables[dataserie] AS serie ".
+
 	       " WHERE user.username=:user AND " .
-	       " perm.dataserie_id=:serie_id AND " .
-	       " perm.user_id=user.id";
+	       " meas.adder_id=user.id AND " .
+	       " meas.dataserie_id=serie.id";
 
       $prepared = $db->prepare($query);
       
       $prepared->bindParam(':user', $data['user']);
-      $prepared->bindParam(':serie_id', $data['serie_id']);
 
       $prepared->execute();
 
       $user_row;
       
-
       foreach($prepared as $row)
       {
 	$user_row = $row;
-
       }
 
-      if(!isset($user_row['id']))
+      if(!isset($user_row['user_id']))
       {
 	$db->rollback();
 	throw_error(USER_ID_NOT_FOUND());
       }
-
-      $query = "INSERT INTO " .
-	       " $tables[measurement] " .
-	       " ( timestamp, value, dataserie_id," .
-	       "   adder_id) VALUES(:time, :value, " .
-	       "                    :data_id, :user_id)";
-      
-      $prepared = $db->prepare($query);
-      
-      $prepared->bindParam(':time', time());
-      $prepared->bindParam(':value', $data['value']);
-      $prepared->bindParam(':data_id', $data['serie_id']);
-      $prepared->bindParam(':user_id', $user_row['id']);
-
-      $prepared->execute();
 
       $db->commit();
 
@@ -85,13 +67,25 @@ function add_value($request)
 
       $db->rollBack();
 
-      error_log("[ADD_VALUE][$query] " . $ex->getMessage());
+      error_log("[GET_LATEST_VALUE][$query] " . $ex->getMessage());
 
       return json_encode(UNEXPECTED_ERROR());
      
     }
-
-    return json_encode(SUCCESS());
+    $msg_array = SUCCESS();
+    $msg_array['data'] = array(
+      'user' => array('id'=>$user_row['user_id']),
+      'measurement' => array(
+	'id' => $user_row['measurement_id'],
+	'value' => $user_row['value'],
+	'timestamp' => $user_row['time']
+      ),
+      'serie' => array(
+	'id' => $user_row['dataserie_id'],
+	'name' => $user_row['name']
+      )
+    );
+    return json_encode($msg_array);
   }
 }
 

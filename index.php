@@ -1,8 +1,9 @@
 <?php
 
-require 'vendor/slim/slim/Slim/Slim.php';
+require_once('vendor/slim/slim/Slim/Slim.php');
 
-require 'add_value.php';
+require_once('add_value.php');
+require_once('latest_value.php');
 
 \Slim\Slim::registerAutoloader();
 
@@ -14,7 +15,24 @@ $app->get('/hello/:name', function($name) {
 
 $app->post('/add/value', function() use ($app){
 
-  add_value($app->request);
+  try {
+    echo add_value($app->request);
+  }
+  catch(Exception $e)
+  {
+    echo $e->getMessage();
+  }
+});
+
+$app->post('/get/latest/value', function() use ($app){
+
+  try {
+    echo get_latest_value($app->request);
+  }
+  catch(Exception $e)
+  {
+    echo $e->getMessage();
+  }
 });
 
 $app->run();
