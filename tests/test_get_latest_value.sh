@@ -1,2 +1,2 @@
 #!/bin/bash
- curl -k -X POST -d @get_latest_value.json https://paino.lahdemaki.fi/api/get/latest/value
+ curl -k -X POST -d @values_for_serie.json https://paino.lahdemaki.fi/api/get/latest/value

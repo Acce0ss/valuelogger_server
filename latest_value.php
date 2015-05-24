@@ -31,12 +31,13 @@ function get_latest_value($request)
 
       $db->beginTransaction();
 
-      $query = "SELECT user.id AS user_id, meas.value AS value, meas.id AS measurement_id, meas.dataserie_id, serie.name, MAX(meas.timestamp) AS time" .
+      $query = "SELECT user.id AS user_id, meas.value AS value, meas.id AS measurement_id, meas.dataserie_id, serie.name, meas.timestamp AS time" .
 	       " FROM $tables[user] AS user, ". 
 	       "      $tables[measurement] AS meas, ".
 	       "      $tables[dataserie] AS serie ".
 
-	       " WHERE user.username=:user AND " .
+	       " WHERE timestamp IN (SELECT MAX(timestamp) FROM $tables[measurement]) AND " . 
+	       " user.username=:user AND " .
 	       " meas.adder_id=user.id AND " .
 	       " meas.dataserie_id=serie.id";
 
